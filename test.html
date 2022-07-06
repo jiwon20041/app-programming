@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 페이지</title>
+    
+    <!-- d3.js는 데이터를 기반으로 문서를 조작하기 위한 JavaScript 라이브러리이며, csv 파일을 읽어오기 위해서 사용 -->
+    <script src='https:/d3js.org/d3.v4.min.js'></script>
+    <!-- 폰트 설정 -->
+    <link href="https://fonts.googleapis.com/css2?family=Cute+Font&family=Gowun+Dodum&family=Titan+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cute+Font&family=Gowun+Batang&family=Gowun+Dodum&family=Titan+One&display=swap" rel="stylesheet">
+
+    <style>
+        /*배경이미지 삽입 및 흐림 조절*/
+        body{background-image:url(./photo/page03_bg.png); 
+            background-repeat: no-repeat center;
+            height: 100vw;
+            background-size: cover;
+            }
+        img {opacity:0.7}
+
+        /*폰트*/
+        h1{font-family: 'Cute Font', cursive;}
+        fieldset legend, tr td{font-family: 'Gowun Dodum', sans-serif;}
+        
+        /*단어표*/
+        div{width: 70%; height: 380px; background-color:rosybrown;color: antiquewhite;}  
+        
+        /*input_text-box 스타일 변경*/
+        input[type=text]{color: black;}
+        input[type=text]:hover{background:aliceblue;}    
+        input[type=text]:focus{font-size: 200%;}          
+       
+        /*'결과보기'버튼 transition 적용*/
+        span {transition: font-size 0.5s;}
+        span:hover{font-size: 120%;}                    
+        
+        td:hover{transform: rotate(10deg);}  /*표 속의 단어들 transform 적용*/           
+    </style>
+</head>
+
+
+<body>
+    <!-- 제목 -->
+    <h1>오늘 당신에게 어울리는 단어 5개를 입력해주세요.</h1>
+    <hr>
+    <!-- 배경음악 -->
+    <audio autoplay controls>
+        <source src="./media/your_name.mp3" type="audio/mp3">
+    </audio>
+    <br>
+    <center><table border:5px></table>
+    
+    
+    <!-- Java script, 단어를 입력받아서 작업하는 부분 -->
+    <script>
+        // 색별 단어 집계 변수
+        var red_count = 0
+        var pink_count = 0
+        var orange_count = 0
+        var yellow_count = 0
+        var green_count = 0
+        var blue_count = 0
+        var purple_count = 0
+        var brown_count = 0
+        var white_count = 0
+        var gray_count = 0
+        var black_count = 0
+        var gold_count = 0
+        var silver_count = 0
+
+        // countword, 색별로 몇개의 단어가 입력되었는지 확인하는 함수
+        function countword(data, word) { 
+            for(var j=0; j<data.length; j++) {            
+                if (word==data[j].red) {
+                    red_count ++   
+                } else if (word==data[j].pink) {
+                    pink_count ++
+                } else if (word==data[j].orange) {
+                    orange_count ++
+                } else if (word==data[j].yellow) {
+                    yellow_count ++
+                } else if (word==data[j].green) {
+                    green_count ++
+                } else if (word==data[j].blue) {
+                    blue_count ++
+                } else if (word==data[j].purple) {
+                    purple_count ++
+                } else if (word==data[j].brown) {
+                    brown_count ++
+                } else if (word==data[j].white) {
+                    white_count ++
+                } else if (word==data[j].gray) {
+                    gray_count ++
+                } else if (word==data[j].black) {
+                    black_count ++
+                } else if (word==data[j].glod) {
+                    gold_count ++
+                } else if (word==data[j].silver) {
+                    silver_count ++
+                } 
+            }
+        } 
+            
+        // wordInput, 결과 보러가기 button을 클릭했을 때 해당 변수에 단어 텍스트가 저장되는 함수
+        function wordInput() { 
+            var word1 = document.getElementById("word1").value;
+            var word2 = document.getElementById("word2").value;
+            var word3 = document.getElementById("word3").value;
+            var word4 = document.getElementById("word4").value;
+            var word5 = document.getElementById("word5").value;
+            
+            // wordsum 어레이에 입력한 단어들 저장
+            var wordsum = []
+            wordsum.push(word1)
+            wordsum.push(word2)
+            wordsum.push(word3)
+            wordsum.push(word4)
+            wordsum.push(word5)
+            console.log(typeof(wordsum));
+
+            // 아무것도 입력하지 않은 상태에서 클릭하면 다음과 같이 안내
+            if (String(wordsum) == String(['', '', '', '', ''])) {
+                alert("입력 후 클릭 바랍니다.")
+            } else {
+
+            // CSV 파일 불러와서 작업
+            d3.csv("./색 단어.csv", function(data){
+                // wordsum에 들어가 있는 단어들을 돌리면서 countword 함수로 색별 단어 갯수 세기 
+                for(let word of wordsum) {
+                    countword(data, word)
+                }
+                var count = [red_count, pink_count, orange_count, yellow_count, green_count, blue_count, purple_count, brown_count, white_count, gray_count, black_count, gold_count, silver_count]
+                var color = ['red', 'pink', 'orange', 'yellow', 'green', 'blue', 'purple', 'brown', 'white', 'gray', 'black', 'gold', 'silver']
+                console.log(color + "\n" + count)
+        
+                // 최대값, 최대값의 인덱스 구하기
+                var max = count[0];  
+                var maxIndex = 0;                 
+                for (var i = 0; i < count.length; i++) {
+                    if (count[i] > max) {                
+                        max = count[i];                
+                        maxIndex = i;            
+                    }        
+                }
+                
+                // 단어가 가장 많이 나온 색이 겹치는지 확인
+                const result = {};
+                    count.forEach((x) => { 
+                    result[x] = (result[x] || 0)+1; 
+                });
+                console.log(result)
+                console.log(result[Math.max(...count)])
+
+                // 겹치지 않으면 바로 결과값으로 이동 
+                if(result[Math.max(...count)]==1) {
+                    if(color[maxIndex]=='red')
+                        location.href = "./result page/resultred.html";
+                    else if (color[maxIndex]=='black')
+                        location.href = "./result page/resultblack.html";
+                    else if (color[maxIndex]=='blue')
+                        location.href = "./result page/resultblue.html";
+                    else if (color[maxIndex]=='brown')
+                        location.href = "./result page/resultbrown.html";    
+                    else if (color[maxIndex]=='gold')
+                        location.href = "./result page/resultgold.html";
+                    else if (color[maxIndex]=='green')
+                        location.href = "./result page/resultgreen.html";
+                    else if (color[maxIndex]=='grey')
+                        location.href = "./result page/resultgrey.html";
+                    else if (color[maxIndex]=='orange')
+                        location.href = "./result page/resultorange.html";    
+                    else if (color[maxIndex]=='pink')
+                        location.href = "./result page/resultpink.html";
+                    else if (color[maxIndex]=='purple')
+                        location.href = "./result page/resultpurple.html";    
+                    else if (color[maxIndex]=='silver')
+                        location.href = "./result page/resultsilver.html";    
+                    else if (color[maxIndex]=='white')
+                        location.href = "./result page/resultwhite.html";    
+                    else if (color[maxIndex]=='yellow')
+                        location.href = "./result page/resultyellow.html";
+
+                // 겹친다면 prompt를 통해 한 번 더 입력
+                } else { 
+                    var duplicate = []
+                    for(var i=0; i<color.length; i++) {
+                        if (count[i] == Math.max(...count))
+                            duplicate.push(color[i])
+                    }
+                    var reprompt = []
+                    for(var i=0; i<duplicate.length; i++) {
+                        for(var j=0; j<data.length; j++) {                                    
+                            var a = duplicate[i] 
+                            reprompt.push(data[j][a])
+                        }
+                    }
+                    console.log(reprompt)
+
+                    // 예외처리 적용하여 중복된 색에 해당하는 단어만 다시 prompt를 통해 입력
+                    while(true) {
+                        var word = window.prompt("<현재 당신의 상황과 가장 비슷한 단어를 하나 입력해 주세요.>\n\n" + reprompt);
+                        console.log(~reprompt.indexOf(word))
+                        if(~reprompt.indexOf(word) != 0) {
+                            break;
+                        } else {
+                            alert("잘못 입력하셨습니다. 다시 입력하세요.");
+                        }
+                    } 
+
+                    countword(data, word)
+                    count = [red_count, pink_count, orange_count, yellow_count, green_count, blue_count, purple_count, brown_count, white_count, gray_count, black_count, gold_count, silver_count]
+                    console.log(count)
+
+                    // 최대값, 최대값의 인덱스 구하기
+                    var max = count[0];  
+                    var maxIndex = 0;                 
+                    for (var i = 0; i < count.length; i++) {
+                        if (count[i] > max) {                
+                            max = count[i];                
+                            maxIndex = i;            
+                        }        
+                    }
+                    
+                    // 결과페이지 이동
+                    if(color[maxIndex]=='red')
+                        location.href = "./result page/resultred.html";
+                    else if (color[maxIndex]=='black')
+                        location.href = "./result page/resultblack.html";
+                    else if (color[maxIndex]=='blue')
+                        location.href = "./result page/resultblue.html";
+                    else if (color[maxIndex]=='brown')
+                        location.href = "./result page/resultbrown.html";    
+                    else if (color[maxIndex]=='gold')
+                        location.href = "./result page/resultgold.html";
+                    else if (color[maxIndex]=='green')
+                        location.href = "./result page/resultgreen.html";
+                    else if (color[maxIndex]=='grey')
+                        location.href = "./result page/resultgrey.html";
+                    else if (color[maxIndex]=='orange')
+                        location.href = "./result page/resultorange.html";    
+                    else if (color[maxIndex]=='pink')
+                        location.href = "./result page/resultpink.html";
+                    else if (color[maxIndex]=='purple')
+                        location.href = "./result page/resultpurple.html";    
+                    else if (color[maxIndex]=='silver')
+                        location.href = "./result page/resultsilver.html";    
+                    else if (color[maxIndex]=='white')
+                        location.href = "./result page/resultwhite.html";    
+                    else if (color[maxIndex]=='yellow')
+                        location.href = "./result page/resultyellow.html";  
+                }
+            });
+            }     
+        }
+    </script>
+
+    <!-- 단어 입력 form -->
+    <form id="form">
+        <fieldset style="width:300px">
+            <legend>내가 고른 5가지 단어</legend>
+            1. <input type="text" id="word1"><br>
+            2. <input type="text" id="word2"><br>
+            3. <input type="text" id="word3"><br>
+            4. <input type="text" id="word4"><br>
+            5. <input type="text" id="word5"><br>
+        </fieldset>
+        <span><button type="button" onclick="wordInput();">결과 보러가기</button></span>
+    </form>
+
+    </table></center>
+    <br><hr><br>
+
+    <!-- 단어 나열 표 -->
+    <center><div>  
+    <table border="1" style="top:430px; left: 380px;">
+        <tr>
+            <td>정열</td>
+            <td>활력</td>
+            <td>적극성</td>
+            <td>외향적</td>
+            <td>부드러움</td>
+            <td>자유</td>
+            <td>증오</td>
+            <td>시끄러움</td>
+            <td>경고</td>
+            <td>고통</td>
+        </tr>
+        <tr>
+            <td>달콤함</td>
+            <td>섬세함</td>
+            <td>상처</td>
+            <td>못미더움</td>
+            <td>사랑스러움</td>
+            <td>귀여움</td>
+            <td>경박함</td>
+            <td>예민함</td>
+            <td>즐거움</td>
+            <td>변덕스러움</td>
+        </tr>
+        <tr>
+            <td>용기</td>
+            <td>따뜻함</td>
+            <td>사교적</td>
+            <td>허풍</td>
+            <td>자비</td>
+            <td>과시</td>
+            <td>불안</td>
+            <td>위험</td>
+            <td>깨달음</td>
+            <td>낙관주의</td>
+        </tr>
+        <tr>
+            <td>친절</td>
+            <td>질투</td>
+            <td>시기</td>
+            <td>불안정</td>
+            <td>유쾌함</td>
+            <td>황제</td>
+            <td>거짓</td>
+            <td>모순</td>
+            <td>자연</td>
+            <td>생명</td>
+        </tr>
+        <tr>
+            <td>미성숙</td>
+            <td>무료함</td>
+            <td>건강</td>
+            <td>떳떳치 못함</td>
+            <td>단조로움</td>
+            <td>의심</td>
+            <td>치유</td>
+            <td>평화</td>
+            <td>희망</td>
+            <td>청춘</td>
+        </tr>
+        <tr>
+            <td>이성</td>
+            <td>잔잔함</td>
+            <td>신뢰</td>
+            <td>슬픔</td>
+            <td>우울</td>
+            <td>고독</td>
+            <td>적막</td>
+            <td>냉정</td>
+            <td>예술적</td>
+            <td>사치</td>
+        </tr>
+        <tr>
+            <td>낭만적</td>
+            <td>풍요</td>
+            <td>고급</td>
+            <td>독창적</td>
+            <td>낭비</td> 
+            <td>불행</td>
+            <td>비현실적</td>
+            <td>침체</td>
+            <td>부드러움</td>
+            <td>온화</td>
+        </tr>
+        <tr>
+            <td>낡은</td>
+            <td>촌스러움</td>
+            <td>보수적</td>
+            <td>든든</td>
+            <td>맛있는</td>
+            <td>겸손</td>
+            <td>빛</td>
+            <td>청결</td>
+            <td>완벽함</td>
+            <td>명료함</td>
+        </tr>
+        <tr>
+            <td>무서움</td>
+            <td>두려움</td>
+            <td>삭막한</td>
+            <td>차가움</td>
+            <td>신뢰성</td>
+            <td>공허</td>
+            <td>중립</td>
+            <td>성숙</td>
+            <td>끈기</td>
+            <td>신중</td>
+        </tr>
+        <tr>
+            <td>조용함</td>
+            <td>애매함</td>
+            <td>불분명</td>
+            <td>미세먼지</td>
+            <td>무기력</td>
+            <td>고집스러움</td>
+            <td>엄숙</td>
+            <td>고급</td>
+            <td>권력</td>
+            <td>세련된</td>
+        </tr>
+        <tr>
+            <td>우아한</td>
+            <td>어두움</td>
+            <td>죽음</td>
+            <td>절망</td>
+            <td>소멸</td>
+            <td>반항</td>
+            <td>태양</td>
+            <td>신성</td>
+            <td>찬란</td>
+            <td>화려한</td>
+        </tr>
+        <tr>
+            <td>부귀영화</td>
+            <td>사치</td>
+            <td>세속</td>
+            <td>허영</td>
+            <td>하이테크놀로지</td>
+            <td>현대문명</td>
+            <td>현대적</td>
+            <td>순수</td>
+            <td>빠른 속도감</td>
+            <td>이차적</td>
+        </tr>
+        <tr>
+            <td>경멸스러움</td>
+            <td>부차적</td>
+        </tr>
+    </table>
+    </div></center>
+
+</body>
+</html>
